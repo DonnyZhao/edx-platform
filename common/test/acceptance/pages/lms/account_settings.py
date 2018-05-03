@@ -78,3 +78,7 @@ class AccountSettingsPage(FieldsMixin, PageObject):
         order detail link or not.
         """
         return self.q(css='.u-field-{} .u-field-{}'.format(field_id, 'link')).visible
+
+    @property
+    def is_delete_button_visible(self):
+        return self.q(css='#delete-account-btn').visible

@@ -24,7 +24,7 @@ class AccountSettingsTestMixin(EventsTestMixin, AcceptanceTest):
     USER_SETTINGS_CHANGED_EVENT_NAME = 'edx.user.settings.changed'
     ACCOUNT_SETTINGS_REFERER = u"/account/settings"
 
-    def visit_account_settings_page(self):
+    def visit_account_settings_page(self, gdpr=False):
         """
         Visit the account settings page for the current user, and store the page instance
         as self.account_settings_page.
@@ -33,6 +33,10 @@ class AccountSettingsTestMixin(EventsTestMixin, AcceptanceTest):
         self.account_settings_page = AccountSettingsPage(self.browser)
         self.account_settings_page.visit()
         self.account_settings_page.wait_for_ajax()
+        # TODO: LEARNER-4422 - delete when we clean up flags
+        if gdpr:
+            self.account_settings_page.browser.get(self.browser.current_url + "?course_experience.gdpr=1")
+            self.account_settings_page.wait_for_page()
 
     def log_in_as_unique_user(self, email=None, full_name=None):
         """
@@ -525,6 +529,23 @@ class AccountSettingsPageTest(AccountSettingsTestMixin, AcceptanceTest):
             )
 
         self.assertTrue(self.account_settings_page.order_button_is_visible('order-Edx-123'))
+
+
+class AccountSettingsDeleteAccountTest(AccountSettingsTestMixin, AcceptanceTest):
+    def setUp(self):
+        """
+        Initialize account and pages.
+        """
+        super(AccountSettingsDeleteAccountTest, self).setUp()
+        self.full_name = FULL_NAME
+        self.social_link = ''
+        self.username, self.user_id = self.log_in_as_unique_user(full_name=self.full_name)
+        self.visit_account_settings_page(gdpr=True)
+
+    def test_button_visible(self):
+        self.assertTrue(
+            self.account_settings_page.is_delete_button_visible
+        )
 
 
 @attr('a11y')
