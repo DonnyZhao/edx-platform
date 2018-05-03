@@ -19,6 +19,11 @@ from student.tests.factories import (CourseAccessRoleFactory,
 from util.password_policy_validators import SecurityPolicyError, ValidationError, validate_password
 
 
+date1 = parse_date('2018-01-01 00:00:00+00:00')
+date2 = parse_date('2018-02-02 00:00:00+00:00')
+date3 = parse_date('2018-03-03 00:00:00+00:00')
+
+
 class TestCompliance(TestCase):
     """
     Tests compliance methods for password policy
@@ -119,9 +124,9 @@ class TestCompliance(TestCase):
         self.assertTrue(_check_user_compliance(user, password))
 
     @override_settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG={
-        'STAFF_USER_COMPLIANCE_DEADLINE': '2018-01-01 00:00:00+00:00',
-        'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': '2018-02-02 00:00:00+00:00',
-        'GENERAL_USER_COMPLIANCE_DEADLINE': '2018-03-03 00:00:00+00:00'
+        'STAFF_USER_COMPLIANCE_DEADLINE': date1,
+        'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': date2,
+        'GENERAL_USER_COMPLIANCE_DEADLINE': date3,
     })
     def test_get_compliance_deadline_for_user(self):
         """
@@ -132,28 +137,15 @@ class TestCompliance(TestCase):
         """
         # Staff user returned the STAFF_USER_COMPLIANCE_DEADLINE
         user = UserFactory(is_staff=True)
-        self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(user))
+        self.assertEqual(date1, _get_compliance_deadline_for_user(user))
 
         # User with CourseAccessRole returns the ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE
         user = UserFactory()
         CourseAccessRoleFactory.create(user=user)
-        self.assertEqual(parse_date('2018-02-02 00:00:00+00:00'), _get_compliance_deadline_for_user(user))
+        self.assertEqual(date2, _get_compliance_deadline_for_user(user))
 
         user = UserFactory()
-        self.assertEqual(parse_date('2018-03-03 00:00:00+00:00'), _get_compliance_deadline_for_user(user))
-
-    @override_settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG={
-        'STAFF_USER_COMPLIANCE_DEADLINE': 'foo',
-        'GENERAL_USER_COMPLIANCE_DEADLINE': '2018-03-03 00:00:00+00:00'
-    })
-    @patch('openedx.core.djangoapps.password_policy.compliance.log')
-    def test_get_compliance_deadline_for_user_misconfiguration(self, mock_log):
-        """
-        Test that we gracefully handle misconfigurations
-        """
-        staff = UserFactory(is_staff=True)
-        self.assertEqual(parse_date('2018-03-03 00:00:00+00:00'), _get_compliance_deadline_for_user(staff))
-        self.assertEqual(mock_log.exception.call_count, 1)
+        self.assertEqual(date3, _get_compliance_deadline_for_user(user))
 
     def test_get_compliance_deadline_for_user_fallbacks(self):
         """
@@ -167,54 +159,54 @@ class TestCompliance(TestCase):
         user = UserFactory()
 
         only_general = {
-            'GENERAL_USER_COMPLIANCE_DEADLINE': '2018-03-03 00:00:00+00:00'
+            'GENERAL_USER_COMPLIANCE_DEADLINE': date3
         }
         with self.settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG=only_general):
-            self.assertEqual(parse_date('2018-03-03 00:00:00+00:00'), _get_compliance_deadline_for_user(staff))
-            self.assertEqual(parse_date('2018-03-03 00:00:00+00:00'), _get_compliance_deadline_for_user(privileged))
-            self.assertEqual(parse_date('2018-03-03 00:00:00+00:00'), _get_compliance_deadline_for_user(both))
+            self.assertEqual(date3, _get_compliance_deadline_for_user(staff))
+            self.assertEqual(date3, _get_compliance_deadline_for_user(privileged))
+            self.assertEqual(date3, _get_compliance_deadline_for_user(both))
 
         no_staff = {
-            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': '2018-02-02 00:00:00+00:00',
-            'GENERAL_USER_COMPLIANCE_DEADLINE': '2018-03-03 00:00:00+00:00'
+            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': date2,
+            'GENERAL_USER_COMPLIANCE_DEADLINE': date3
         }
         with self.settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG=no_staff):
-            self.assertEqual(parse_date('2018-02-02 00:00:00+00:00'), _get_compliance_deadline_for_user(both))
-            self.assertEqual(parse_date('2018-02-02 00:00:00+00:00'), _get_compliance_deadline_for_user(staff))
+            self.assertEqual(date2, _get_compliance_deadline_for_user(both))
+            self.assertEqual(date2, _get_compliance_deadline_for_user(staff))
 
         no_privileged = {
-            'STAFF_USER_COMPLIANCE_DEADLINE': '2018-01-01 00:00:00+00:00',
-            'GENERAL_USER_COMPLIANCE_DEADLINE': '2018-03-03 00:00:00+00:00'
+            'STAFF_USER_COMPLIANCE_DEADLINE': date1,
+            'GENERAL_USER_COMPLIANCE_DEADLINE': date3
         }
         with self.settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG=no_privileged):
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(both))
-            self.assertEqual(parse_date('2018-03-03 00:00:00+00:00'), _get_compliance_deadline_for_user(privileged))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(both))
+            self.assertEqual(date3, _get_compliance_deadline_for_user(privileged))
 
         only_privileged = {
-            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': '2018-02-02 00:00:00+00:00',
+            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': date2,
         }
         with self.settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG=only_privileged):
-            self.assertEqual(parse_date('2018-02-02 00:00:00+00:00'), _get_compliance_deadline_for_user(both))
-            self.assertEqual(parse_date('2018-02-02 00:00:00+00:00'), _get_compliance_deadline_for_user(staff))
+            self.assertEqual(date2, _get_compliance_deadline_for_user(both))
+            self.assertEqual(date2, _get_compliance_deadline_for_user(staff))
             self.assertIsNone(_get_compliance_deadline_for_user(user))
 
         early_elevated = {
-            'STAFF_USER_COMPLIANCE_DEADLINE': '2018-02-02 00:00:00+00:00',
-            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': '2018-01-01 00:00:00+00:00',
+            'STAFF_USER_COMPLIANCE_DEADLINE': date2,
+            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': date1,
         }
         with self.settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG=early_elevated):
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(both))
-            self.assertEqual(parse_date('2018-02-02 00:00:00+00:00'), _get_compliance_deadline_for_user(staff))
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(privileged))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(both))
+            self.assertEqual(date2, _get_compliance_deadline_for_user(staff))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(privileged))
             self.assertIsNone(_get_compliance_deadline_for_user(user))
 
         early_general = {
-            'STAFF_USER_COMPLIANCE_DEADLINE': '2018-03-03 00:00:00+00:00',
-            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': '2018-02-02 00:00:00+00:00',
-            'GENERAL_USER_COMPLIANCE_DEADLINE': '2018-01-01 00:00:00+00:00',
+            'STAFF_USER_COMPLIANCE_DEADLINE': date3,
+            'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE': date2,
+            'GENERAL_USER_COMPLIANCE_DEADLINE': date1,
         }
         with self.settings(PASSWORD_POLICY_COMPLIANCE_ROLLOUT_CONFIG=early_general):
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(both))
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(staff))
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(privileged))
-            self.assertEqual(parse_date('2018-01-01 00:00:00+00:00'), _get_compliance_deadline_for_user(user))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(both))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(staff))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(privileged))
+            self.assertEqual(date1, _get_compliance_deadline_for_user(user))

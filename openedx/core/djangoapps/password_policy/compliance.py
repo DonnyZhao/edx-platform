@@ -3,17 +3,12 @@ Utilities for enforcing and tracking compliance with password policy rules.
 """
 from datetime import datetime
 
-import logging
 import pytz
-import six
-from dateutil.parser import parse as parse_date
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from util.date_utils import DEFAULT_SHORT_DATE_FORMAT, strftime_localized
 from util.password_policy_validators import validate_password
-
-log = logging.getLogger(__name__)
 
 
 class NonCompliantPasswordException(Exception):
@@ -118,11 +113,9 @@ def _get_compliance_deadline_for_user(user):
 
     # Implied hierarchy of general->staff in terms of scope, so we'll use each as a fallback to the other for any
     # blank fields.
-    general_deadline = _get_deadline_safely(config, 'GENERAL_USER_COMPLIANCE_DEADLINE')
-    privilege_deadline = _get_deadline_safely(config, 'ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE',
-                                              fallback=general_deadline)
-    staff_deadline = _get_deadline_safely(config, 'STAFF_USER_COMPLIANCE_DEADLINE',
-                                          fallback=privilege_deadline)
+    general_deadline = config.get('GENERAL_USER_COMPLIANCE_DEADLINE')
+    privilege_deadline = config.get('ELEVATED_PRIVILEGE_USER_COMPLIANCE_DEADLINE', general_deadline)
+    staff_deadline = config.get('STAFF_USER_COMPLIANCE_DEADLINE', privilege_deadline)
 
     # Now only keep the deadlines that apply to this user
     privilege_deadline = privilege_deadline if privilege_deadline and _user_has_course_access_role(user) else None
@@ -131,22 +124,6 @@ def _get_compliance_deadline_for_user(user):
     # Take minimum remaining deadline
     filtered_deadlines = filter(None, (staff_deadline, privilege_deadline, general_deadline,))
     return min(filtered_deadlines) if filtered_deadlines else None
-
-
-def _get_deadline_safely(config, setting, fallback=None):
-    """
-    Returns a parsed datetime.datetime object for a given config setting name.
-    Returns None if anything goes wrong.
-    """
-    deadline = config.get(setting, fallback)
-    if not isinstance(deadline, six.string_types):
-        return deadline
-
-    try:
-        return parse_date(deadline)
-    except (ValueError, OverflowError):
-        log.exception("Could not parse %s password policy rollout value of '%s'.", setting, deadline)
-        return None
 
 
 def _user_has_course_access_role(user):
