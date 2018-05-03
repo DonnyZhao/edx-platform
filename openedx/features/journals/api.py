@@ -25,15 +25,28 @@ class DiscoveryApiClient(object):
     """
     Class for interacting with the discovery service journals endpoint
     """
-    def __init__(self, user):
+    def __init__(self):
         """
         Initialize an authenticated Discovery service API client by using the
         provided user.
         """
-        self.user = user
+        catalog_integration = CatalogIntegration.current()
+
+        # Client can't be used if there is no catalog integration
+        if not (catalog_integration and catalog_integration.enabled):
+            LOGGER.info("Unable to create DiscoveryApiClient because catalog integration not set up or enabled")
+            return None
+
+        try:
+            user = catalog_integration.get_service_user()
+        except ObjectDoesNotExist:
+            LOGGER.info("Unable to retrieve catalog integration service user")
+            return None
+
         jwt = JwtBuilder(user).build_token([])
         url = configuration_helpers.get_value('COURSE_CATALOG_API_URL', settings.COURSE_CATALOG_API_URL)
         self.client = EdxRestApiClient(self.create_journals_url(url), jwt=jwt)
+
 
     def create_journals_url(self, url):
         '''rewrite the discovery url to point to journals endpoint'''
@@ -63,6 +76,17 @@ class DiscoveryApiClient(object):
             )
             return []
 
+    def get_journal_bundles(self, uuid=''):
+        try:
+            response = self.client.journal_bundles(uuid).get()
+        except (HttpClientError, HttpServerError) as err:
+            LOGGER.exception(
+                'Failed to get journal bundles from discovery-service [%s]',
+                err.content
+            )
+            return []
+        return response if uuid else response.get('results')
+
 
 class JournalsApiClient(object):
     """
@@ -70,7 +94,7 @@ class JournalsApiClient(object):
     """
     def __init__(self, user):
         """
-        Initialize an authenticated Enterprise service API client by using the
+        Initialize an authenticated Journals service API client by using the
         provided user.
         """
         self.user = user
@@ -139,24 +163,67 @@ def get_journals(site):
     journals = cache.get(cache_key)
 
     if not journals:
-        catalog_integration = CatalogIntegration.current()
-        if catalog_integration.enabled:
-            try:
-                user = catalog_integration.get_service_user()
-            except ObjectDoesNotExist:
-                return []
-
-            api_client = DiscoveryApiClient(user)
-            journals = api_client.get_journals(orgs)
-            cache.set(cache_key, journals, JOURNALS_CACHE_TIMEOUT)
-        else:
+        api_client = DiscoveryApiClient()
+        if not api_client:
             return []
+        journals = api_client.get_journals(orgs)
+        cache.set(cache_key, journals, JOURNALS_CACHE_TIMEOUT)
 
     return journals
 
+
+def filter_bundles_by_course(bundles, course_id):
+    matching_bundles = []
+    for bundle in bundles:
+        if course_id in [course['key'] for course in bundle['courses']]:
+            matching_bundles.append(bundle)
+    return matching_bundles
+
+
+def get_journal_bundles(site, course_id='', bundle_uuid=''):
+    """Retrieve journal bundles from the discovery service.
+
+    Returns:
+        list of dict, representing journal bundles
+    """
+    if not journals_enabled():
+        return []
+
+    api_resource = 'journal_bundles'
+
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource=api_resource,
+        course_id=course_id,
+        bundle_uuid=bundle_uuid
+    )
+
+    journal_bundles = cache.get(cache_key)
+
+    if not journal_bundles:
+        api_client = DiscoveryApiClient()
+        if not api_client:
+            return []
+        journal_bundles = api_client.get_journal_bundles(uuid=bundle_uuid)
+        if course_id:
+            journal_bundles = filter_bundles_by_course(journal_bundles, course_id)
+        cache.set(cache_key, journal_bundles, JOURNALS_CACHE_TIMEOUT)
+    return journal_bundles
 
 def get_journals_root_url():
     '''
     Return the base url used to display Journals
     '''
     return configuration_helpers.get_configuration_value('JOURNALS_ROOT_URL', settings.JOURNALS_ROOT_URL)
+
+
+def get_journal_bundle_by_course_id(course_id):
+    journal_data = {
+        'has_bundled_journal': False,
+        'bundle_purchase_url': '',
+        'journal_overview': ''
+    }
+    if journals_enabled():
+        journal_bundles = get_journal_bundles()
+        journal_data = journal_bundles
+    return journal_data
