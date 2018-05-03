@@ -15,6 +15,11 @@ def runPythonTests() {
     }
 }
 
+def savePythonTestArtifacts() {
+    archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
+    junit '**/nosetests.xml'
+}
+
 pipeline {
 
     agent { label "coverage-worker" }
@@ -40,8 +45,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -58,8 +64,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -76,8 +83,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -94,8 +102,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -112,8 +121,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -130,8 +140,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -148,8 +159,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -166,8 +178,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -184,8 +197,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -202,8 +216,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -220,8 +235,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -238,8 +254,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -256,8 +273,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -274,8 +292,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
@@ -292,8 +311,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
-                            junit '**/nosetests.xml'
+                            script {
+                                savePythonTestArtifacts()
+                            }
                         }
                     }
                 }
