@@ -6,8 +6,20 @@ from pytz import UTC
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 
+from enterprise.models import EnterpriseCourseEnrollment, EnterpriseCustomerUser, PendingEnterpriseCustomerUser
+from integrated_channels.sap_success_factors.models import SapSuccessFactorsLearnerDataTransmissionAudit
+
 from consent.models import DataSharingConsent
-from student.models import UserProfile
+from entitlements.models import CourseEntitlement, CourseEntitlementSupportDetail
+from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification
+from openedx.core.djangoapps.course_groups.models import UnregisteredLearnerCohortAssignments
+from student.models import (
+    PendingEmailChange,
+    UserProfile,
+    CourseEnrollmentAllowed
+)
+
+from ..models import RetirementState, RetirementStateError, UserOrgTag, UserRetirementStatus
 
 
 class Command(BaseCommand):
@@ -80,7 +92,8 @@ class Command(BaseCommand):
 
         )
         CourseEntitlementSupportDetail.objects.create(
-
+            support_user=user,
+            comments='bla bla test comments bla bla'
         )
 
         # Retire misc. models that may contain PII of this user
