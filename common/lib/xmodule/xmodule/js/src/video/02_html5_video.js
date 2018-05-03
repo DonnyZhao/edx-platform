@@ -95,6 +95,10 @@ function(_) {
             this.videoEl.on('error', this.onError.bind(this));
         }
 
+        Player.prototype.showPlayButton = function() {
+            this.videoOverlayEl.removeClass('is-hidden');
+        };
+
         Player.prototype.callStateChangeCallback = function() {
             if ($.isFunction(this.config.events.onStateChange)) {
                 this.config.events.onStateChange({
@@ -215,7 +219,7 @@ function(_) {
             this.playerState = HTML5Video.PlayerState.PAUSED;
             if ($.isFunction(this.config.events.onReady)) {
                 this.config.events.onReady(null);
-                this.videoOverlayEl.removeClass('is-hidden');
+                this.showPlayButton();
             }
         };
 
@@ -234,7 +238,7 @@ function(_) {
         Player.prototype.onPause = function() {
             this.playerState = HTML5Video.PlayerState.PAUSED;
             this.callStateChangeCallback();
-            this.videoOverlayEl.removeClass('is-hidden');
+            this.showPlayButton();
         };
 
         Player.prototype.onEnded = function() {
