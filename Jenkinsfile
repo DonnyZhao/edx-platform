@@ -7,7 +7,9 @@ def runPythonTests() {
                 refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
                 url: 'git@github.com:edx/edx-platform.git']]]
             console_output = sh(returnStdout: true, script: 'bash scripts/all-tests.sh').trim()
-            writeFile file: "${TEST_SUITE}-${SHARD}-console-output.log", text: console_output
+            dir('stdout') {
+                writeFile file: "${TEST_SUITE}-${SHARD}-stdout.log", text: console_output
+            }
             stash includes: 'reports/**/*coverage*', name: "${TEST_SUITE}-${SHARD}-reports"
         }
     }
@@ -38,7 +40,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -56,7 +58,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -74,7 +76,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -92,7 +94,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -110,7 +112,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -128,7 +130,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -146,7 +148,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -164,7 +166,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -182,7 +184,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -200,7 +202,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -218,7 +220,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -236,7 +238,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -254,7 +256,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -272,7 +274,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
@@ -290,7 +292,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,*.log'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/**/*,test_root/log/**/*.log,**/nosetests.xml,stdout/*.log,*.log'
                             junit '**/nosetests.xml'
                         }
                     }
