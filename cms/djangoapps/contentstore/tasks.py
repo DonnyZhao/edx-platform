@@ -330,7 +330,12 @@ def rerun_course(source_course_key_string, destination_course_key_string, user_i
         # as the Mongo modulestore doesn't support multiple runs of the same course.
         store = modulestore()
         with store.default_store('split'):
-            store.clone_course(source_course_key, destination_course_key, user_id, fields=fields)
+            new_course = store.clone_course(source_course_key, destination_course_key, user_id, fields=fields)
+            # Exclude fields for new course run.
+            excluded_fields = {'video_upload_pipeline': {}}
+            for excluded_field, value  in excluded_fields.iteritems():
+                setattr(new_course, excluded_field, value)
+                store.update_item(new_course, user_id)
 
         # set initial permissions for the user to access the course.
         initialize_permissions(destination_course_key, User.objects.get(id=user_id))
